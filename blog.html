@@ -7,26 +7,30 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
+    <header>
+        <div class="container">
             <h1>Welcome to My Blog</h1>
-        </header>
-
-        <div id="posts-container">
-            <!-- Dynamic Blog Posts will go here -->
         </div>
+    </header>
 
-        <footer>
-            <p>Created with ❤️ by Your Name</p>
-        </footer>
+    <div class="container">
+        <div id="posts-container">
+            <!-- Dynamic Blog Posts will be inserted here -->
+        </div>
     </div>
+
+    <footer>
+        <div class="container">
+            <p>Created with ❤️ by Your Name</p>
+        </div>
+    </footer>
 
     <script>
         // Function to load and display blog posts
         function loadBlogPosts() {
             const postsContainer = document.getElementById('posts-container');
             
-            // Fetch the text file that contains all the blog posts
+            // Fetch the text file containing the blog posts
             fetch('posts.txt')
                 .then(response => response.text())
                 .then(data => {
