@@ -3,148 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Simple blog with dynamic posts">
     <title>My Blog</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 10px 0;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .post {
-            margin-bottom: 30px;
-            background-color: #fff;
-            padding: 15px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .post h2 {
-            color: #2c3e50;
-        }
-        .post p {
-            font-size: 16px;
-            line-height: 1.6;
-        }
-        textarea {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #555;
-        }
-        footer {
-            text-align: center;
-            background-color: #333;
-            color: white;
-            padding: 10px 0;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <h1>Welcome to My Blog</h1>
+    <div id="posts-container"></div>
 
-<header>
-    <h1>My Blog</h1>
-    <p>Share your thoughts with the world!</p>
-</header>
+    <script>
+        // Function to load and display blog posts
+        function loadBlogPosts() {
+            const postsContainer = document.getElementById('posts-container');
+            
+            // Fetch the text file that contains all the blog posts
+            fetch('posts.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const posts = parsePosts(data); // Parse the posts from the file
 
-<div class="container">
-    <div>
-        <h2>Create a New Post</h2>
-        <textarea id="postContent" rows="5" placeholder="Write your post here..."></textarea>
-        <br>
-        <button onclick="savePost()">Save Post</button>
-    </div>
-
-    <div id="postsContainer">
-        <h2>Saved Posts</h2>
-        <!-- Posts will be dynamically inserted here -->
-    </div>
-</div>
-
-<footer>
-    <p>&copy; 2024 My Blog</p>
-</footer>
-
-<script>
-    // Function to save the post in local storage and display it
-    function savePost() {
-        const postContent = document.getElementById('postContent').value;
-        if (postContent.trim() === '') {
-            alert('Please write something before saving!');
-            return;
+                    // Loop through the posts and display them
+                    posts.forEach(post => {
+                        const postHTML = `
+                            <div class="post">
+                                <h2>${post.title}</h2>
+                                <p>${post.content}</p>
+                            </div>
+                        `;
+                        postsContainer.innerHTML += postHTML;
+                    });
+                })
+                .catch(error => console.error('Error loading posts:', error));
         }
 
-        const posts = JSON.parse(localStorage.getItem('posts')) || [];
-        const newPost = {
-            content: postContent,
-            date: new Date().toLocaleString()
-        };
+        // Function to parse the posts from the text file content
+        function parsePosts(data) {
+            const posts = [];
+            const lines = data.split('\n');
+            let currentPost = null;
 
-        posts.push(newPost);
-        localStorage.setItem('posts', JSON.stringify(posts));
+            // Loop through the lines and extract titles and content
+            lines.forEach(line => {
+                line = line.trim(); // Remove extra spaces
+                if (line.startsWith('Blog:')) {
+                    // Save the previous post if there is one
+                    if (currentPost) {
+                        posts.push(currentPost);
+                    }
+                    // Start a new post
+                    currentPost = {
+                        title: line.replace('Blog:', '').trim(),
+                        content: ''
+                    };
+                } else if (currentPost) {
+                    // Add content to the current post
+                    currentPost.content += line + '\n';
+                }
+            });
 
-        document.getElementById('postContent').value = '';  // Clear the textarea
-        displayPosts();  // Refresh the posts display
-    }
+            // Push the last post
+            if (currentPost) {
+                posts.push(currentPost);
+            }
 
-    // Function to display all saved posts
-    function displayPosts() {
-        const postsContainer = document.getElementById('postsContainer');
-        postsContainer.innerHTML = '<h2>Saved Posts</h2>';  // Reset the content
-
-        const posts = JSON.parse(localStorage.getItem('posts')) || [];
-        if (posts.length === 0) {
-            postsContainer.innerHTML += '<p>No posts yet. Start writing!</p>';
-            return;
+            return posts;
         }
 
-        posts.forEach((post, index) => {
-            const postElement = document.createElement('div');
-            postElement.classList.add('post');
-            postElement.innerHTML = `
-                <h2>Post #${index + 1}</h2>
-                <p><strong>Posted on:</strong> ${post.date}</p>
-                <p>${post.content}</p>
-            `;
-            postsContainer.appendChild(postElement);
-        });
-    }
-
-    // Load posts when the page is loaded
-    window.onload = displayPosts;
-</script>
-
+        // Load posts when the page loads
+        window.onload = loadBlogPosts;
+    </script>
 </body>
 </html>
